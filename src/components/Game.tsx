@@ -21,8 +21,15 @@ const Game: React.FC = () => {
   const [result, setResult] = useState<GameResult>('');
   const [isPcVsPc, setIsPcVsPc] = useState<boolean>(false);
 
+  // Track a unique key to force CSS animation re-trigger on every play
+  const [playCount, setPlayCount] = useState<number>(0);
+
   // Use a ref to hold the interval ID for cleanup
   const pcIntervalRef = useRef<number | null>(null);
+
+  // We need a ref to the latest playGame function so the interval always calls the current one,
+  // avoiding stale closures when 'wins' and 'loses' change.
+  const latestPlayGame = useRef<(playerChoice: Weapon) => void>();
 
   // Update sessionStorage whenever wins or loses change
   useEffect(() => {
@@ -53,15 +60,21 @@ const Game: React.FC = () => {
       setActiveWeapon(playerChoice);
       setEnemyResponse(responseString);
       setResult(currentResult);
+      setPlayCount(prev => prev + 1); // Trigger the CSS animation restart
 
       if (currentResult === 'win') {
-        setWins((prev) => prev + 1);
+        setWins(wins + 1);
       } else if (currentResult === 'lose') {
-        setLoses((prev) => prev + 1);
+        setLoses(loses + 1);
       }
     },
-    []
+    [wins, loses]
   );
+
+  // Update ref every time playGame changes
+  useEffect(() => {
+    latestPlayGame.current = playGame;
+  }, [playGame]);
 
   const resetGame = () => {
     setWins(0);
@@ -69,6 +82,7 @@ const Game: React.FC = () => {
     setActiveWeapon(null);
     setEnemyResponse('');
     setResult('');
+    setPlayCount(0);
     stopPcVsPc();
     sessionStorage.removeItem('wins');
     sessionStorage.removeItem('loses');
@@ -91,7 +105,9 @@ const Game: React.FC = () => {
     setIsPcVsPc(true);
     pcIntervalRef.current = window.setInterval(() => {
       const randomWeapon = WEAPON_KEYS[Math.floor(Math.random() * WEAPON_KEYS.length)];
-      playGame(randomWeapon);
+      if (latestPlayGame.current) {
+        latestPlayGame.current(randomWeapon);
+      }
     }, 1000);
   };
 
@@ -131,7 +147,8 @@ const Game: React.FC = () => {
       </ul>
 
       <ul className="enemy">
-        <li className={enemyResponse ? 'fadeIn' : 'fadeOut'}>
+        {/* We use key={playCount} to remount the list item and trigger the animation every time playCount changes */}
+        <li key={playCount} className={enemyResponse ? 'enemyFadeIn' : 'fadeOut'}>
           {enemyResponse || 'Make your move!'}
         </li>
       </ul>
