@@ -1,11 +1,48 @@
-# Rock Scissor Paper Game (in ReactJS)
-I have written this Rock Scissor Paper game in ReactJS to complete a task I have receive that should include the following functions:
+# Rock Scissor Paper Game (ReactJS)
 
-- Player vs. Computer
-- Computer vs. Computer
-- Save the game score, even when refreshing the browser
-- Desktop and mobile responsive
+I originally wrote this Rock Scissor Paper game in ReactJS a long time ago for a job interview. Now, I have completely rewritten and optimized it as a modern Senior React Developer using modern hooks, strict TypeScript, Vite, and better state management!
 
-You can find the game and the source code on [CodePen](https://codepen.io/alexiovay/pen/rEEmEz?editors=0110#0). I haven't uploaded the files here since I might be still working on the code, directly on CodePen.
+## Features
+
+- **Player vs. Computer:** Play the classic game against the computer.
+- **Computer vs. Computer (Auto Mode):** Watch two AIs play against each other with a single button click.
+- **Persistent State:** Game score is saved in your browser's session storage and remains even when you refresh the page.
+- **Responsive:** Works seamlessly on Desktop and Mobile.
+
+## Preview
 
 ![preview](https://github.com/AlexioVay/RockScissorPaper/blob/master/RockScissorPaper.gif)
+
+## Tech Stack
+
+- React 19+
+- TypeScript
+- Vite
+- CSS Modules / Standard CSS
+
+## Getting Started
+
+To run this project locally:
+
+1. **Clone the repository:**
+   ```bash
+   git clone <repo-url>
+   cd RockScissorPaper
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+Have fun playing!
