@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import './Game.css';
+import Leaderboard from './Leaderboard';
 
 type Weapon = 'rock' | 'paper' | 'scissor';
 type GameResult = 'win' | 'lose' | 'draw' | '';
@@ -19,15 +20,20 @@ const Game: React.FC = () => {
   const [activeWeapon, setActiveWeapon] = useState<Weapon | null>(null);
   const [enemyResponse, setEnemyResponse] = useState<string>('');
   const [result, setResult] = useState<GameResult>('');
-  const [isPcVsPc, setIsPcVsPc] = useState<boolean>(false);
   const [isChallengeMode, setIsChallengeMode] = useState<boolean>(false);
   const [challengeWeapon, setChallengeWeapon] = useState<Weapon | null>(null);
   const [challengeTimer, setChallengeTimer] = useState<number>(0);
   const [isChallengeActive, setIsChallengeActive] = useState<boolean>(false);
 
+  // Multiplayer State
+  const [username, setUsername] = useState<string>('');
+  const [isMultiplayer, setIsMultiplayer] = useState<boolean>(false);
+  const [opponent, setOpponent] = useState<string | null>(null);
+  const [multiplayerState, setMultiplayerState] = useState<'idle' | 'waiting' | 'playing' | 'finished'>('idle');
+
   // Use a ref to hold the interval ID for cleanup
-  const pcIntervalRef = useRef<number | null>(null);
   const challengeIntervalRef = useRef<number | null>(null);
+  const pollIntervalRef = useRef<number | null>(null);
 
   // Update sessionStorage whenever wins or loses change
   useEffect(() => {
@@ -75,18 +81,74 @@ const Game: React.FC = () => {
     }, 100);
   }, [isChallengeMode]);
 
+  const joinMultiplayer = async () => {
+    if (!username.trim()) return;
+    try {
+      // Get country code
+      let countryCode = 'Unknown';
+      try {
+        const geoData = await fetch('https://get.geojs.io/v1/ip/geo.json').then(r => r.json());
+        countryCode = geoData.country_code || 'Unknown';
+      } catch (e) {
+        console.error('Failed to fetch country', e);
+      }
+
+      const res = await fetch('http://localhost:3001/api/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, country: countryCode }),
+      });
+
+      if (res.ok) {
+        setIsMultiplayer(true);
+        setMultiplayerState('waiting');
+        stopChallengeMode();
+        setResult('');
+        setActiveWeapon(null);
+        setEnemyResponse('');
+      }
+    } catch (e) {
+      console.error('Error joining multiplayer', e);
+    }
+  };
+
+  const stopMultiplayer = () => {
+    setIsMultiplayer(false);
+    setMultiplayerState('idle');
+    setOpponent(null);
+    setResult('');
+    setActiveWeapon(null);
+    setEnemyResponse('');
+  };
+
   const startChallengeMode = () => {
     if (isChallengeMode) {
       stopChallengeMode();
       return;
     }
-    stopPcVsPc();
+    stopMultiplayer();
     setIsChallengeMode(true);
     startChallengeRound();
   };
 
   const playGame = useCallback(
-    (playerChoice: Weapon) => {
+    async (playerChoice: Weapon) => {
+      if (isMultiplayer) {
+        if (multiplayerState !== 'playing') return;
+
+        setActiveWeapon(playerChoice);
+        try {
+          await fetch('http://localhost:3001/api/choice', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, choice: playerChoice }),
+          });
+        } catch (e) {
+          console.error(e);
+        }
+        return; // Early return for multiplayer
+      }
+
       if (isChallengeMode && !isChallengeActive) return;
 
       if (isChallengeMode) {
@@ -136,7 +198,7 @@ const Game: React.FC = () => {
       }
 
     },
-    [isChallengeMode, isChallengeActive, challengeWeapon]
+    [isChallengeMode, isChallengeActive, challengeWeapon, isMultiplayer, multiplayerState, username]
   );
 
   // Handle triggering next challenge round when inactive but still in challenge mode
@@ -161,7 +223,6 @@ const Game: React.FC = () => {
     setActiveWeapon(null);
     setEnemyResponse('');
     setResult('');
-    stopPcVsPc();
     stopChallengeMode();
     sessionStorage.removeItem('wins');
     sessionStorage.removeItem('loses');
@@ -178,41 +239,79 @@ const Game: React.FC = () => {
     setChallengeTimer(0);
   }, []);
 
-  const stopPcVsPc = useCallback(() => {
-    if (pcIntervalRef.current !== null) {
-      window.clearInterval(pcIntervalRef.current);
-      pcIntervalRef.current = null;
-    }
-    setIsPcVsPc(false);
-  }, []);
+  // Multiplayer Polling
+  const pollMultiplayerState = useCallback(async () => {
+    if (!username || !isMultiplayer) return;
+    try {
+      const res = await fetch(`http://localhost:3001/api/state?username=${encodeURIComponent(username)}`);
+      if (res.ok) {
+        const data = await fetch(`http://localhost:3001/api/state?username=${encodeURIComponent(username)}`).then(r => r.json());
+        if (data.status === 'not_found') {
+          setIsMultiplayer(false);
+          setMultiplayerState('idle');
+          setOpponent(null);
+          return;
+        }
 
-  const startPcVsPc = () => {
-    if (isPcVsPc) {
-      stopPcVsPc();
-      return;
-    }
+        setMultiplayerState(data.status);
+        setOpponent(data.opponent);
 
-    stopChallengeMode();
-    setIsPcVsPc(true);
-    pcIntervalRef.current = window.setInterval(() => {
-      const randomWeapon = WEAPON_KEYS[Math.floor(Math.random() * WEAPON_KEYS.length)];
-      playGame(randomWeapon);
-    }, 1000);
-  };
+        // Let's handle the response correctly
+        if (data.status === 'playing') {
+          if (data.hasOpponentChosen && !data.opponentChoice) {
+            setEnemyResponse("Opponent has chosen...");
+          } else if (!data.hasOpponentChosen) {
+            setEnemyResponse("Waiting for opponent to choose...");
+          }
+        }
+
+        // If finished, calculate result and set it
+        if (data.status === 'finished') {
+           if (data.result && data.result[username]) {
+             setResult(data.result[username]);
+             setActiveWeapon(data.myChoice);
+             if (data.opponentChoice) {
+               setEnemyResponse(`${data.myChoice} ${WEAPONS[data.myChoice as Weapon]} vs. ${WEAPONS[data.opponentChoice as Weapon]} ${data.opponentChoice}`);
+             }
+           }
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [username, isMultiplayer]);
+
+  useEffect(() => {
+    if (isMultiplayer) {
+      pollIntervalRef.current = window.setInterval(pollMultiplayerState, 1000);
+    } else {
+      if (pollIntervalRef.current !== null) {
+        window.clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    }
+    return () => {
+      if (pollIntervalRef.current !== null) {
+        window.clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
+  }, [isMultiplayer, pollMultiplayerState]);
 
   // Cleanup interval on unmount
   useEffect(() => {
     return () => {
-      stopPcVsPc();
       stopChallengeMode();
+      if (pollIntervalRef.current !== null) {
+        window.clearInterval(pollIntervalRef.current);
+      }
     };
-  }, [stopPcVsPc, stopChallengeMode]);
+  }, [stopChallengeMode]);
 
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Don't register if not in a state to play
-      if (isPcVsPc) return;
       if (isChallengeMode && !isChallengeActive) return;
 
       const key = event.key.toLowerCase();
@@ -229,7 +328,7 @@ const Game: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isPcVsPc, isChallengeMode, isChallengeActive, playGame]);
+  }, [isChallengeMode, isChallengeActive, playGame]);
 
   return (
     <div className="game">
@@ -249,7 +348,6 @@ const Game: React.FC = () => {
             key={weapon}
             id={weapon}
             onClick={() => {
-              if (isPcVsPc) stopPcVsPc();
               playGame(weapon);
             }}
             className={activeWeapon === weapon ? 'fadeIn' : activeWeapon === null ? 'fadeIn' : 'fadeOut'}
@@ -272,24 +370,53 @@ const Game: React.FC = () => {
         <li className={isChallengeMode && isChallengeActive ? 'challenge-reveal' : enemyResponse ? 'fadeIn' : 'fadeOut'}>
           {isChallengeMode && isChallengeActive && challengeWeapon
             ? WEAPONS[challengeWeapon]
+            : isMultiplayer && multiplayerState === 'waiting'
+            ? 'Waiting for opponent...'
             : enemyResponse || 'Make your move!'}
         </li>
       </ul>
 
       <div className="controls">
-        <button onClick={startPcVsPc} disabled={isChallengeMode}>
-          {isPcVsPc ? 'Stop PC' : 'PC vs. PC'}
-        </button>
-        <button onClick={startChallengeMode} disabled={isPcVsPc}>
+        {!isMultiplayer ? (
+          <div className="multiplayer-join">
+            <input
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              disabled={isMultiplayer}
+            />
+            <button onClick={joinMultiplayer} disabled={!username.trim()}>
+              Join Multiplayer
+            </button>
+          </div>
+        ) : (
+          <button onClick={stopMultiplayer}>Leave Multiplayer</button>
+        )}
+
+        <button onClick={startChallengeMode} disabled={isMultiplayer}>
           {isChallengeMode ? 'Stop Challenge' : 'Challenge Mode'}
         </button>
         <button onClick={resetGame}>Reset</button>
       </div>
+
+      {isMultiplayer && (
+        <div className="multiplayer-status">
+          {multiplayerState === 'waiting' && <p>Waiting for opponent...</p>}
+          {multiplayerState === 'playing' && opponent && <p>Playing against: {opponent}</p>}
+          {multiplayerState === 'finished' && <button onClick={joinMultiplayer}>Play Again</button>}
+        </div>
+      )}
+
       {isChallengeMode && (
         <div className="hint">
           Use Q (Rock), W (Paper), E (Scissor) to quick-counter!
         </div>
       )}
+
+      <div className="leaderboard-wrapper">
+        <Leaderboard />
+      </div>
     </div>
   );
 };
