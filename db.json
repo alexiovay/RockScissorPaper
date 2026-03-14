@@ -1,0 +1,39 @@
+{
+  "users": {
+    "PlayerOne": {
+      "lastActive": 1773483151982,
+      "country": "US"
+    },
+    "PlayerTwo": {
+      "lastActive": 1773483152235,
+      "country": "US"
+    }
+  },
+  "games": {
+    "game_1773483148959_5wpgfx": {
+      "player1": "PlayerOne",
+      "player2": "PlayerTwo",
+      "p1Choice": "rock",
+      "p2Choice": "scissor",
+      "status": "finished",
+      "result": {
+        "PlayerOne": "win",
+        "PlayerTwo": "lose"
+      }
+    }
+  },
+  "leaderboard": [
+    {
+      "username": "PlayerOne",
+      "country": "US",
+      "result": "win",
+      "timestamp": 1773483151756
+    },
+    {
+      "username": "PlayerTwo",
+      "country": "US",
+      "result": "lose",
+      "timestamp": 1773483151756
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+.leaderboard {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  text-align: center;
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.leaderboard h2 {
+  margin-top: 0;
+  color: #333;
+}
+
+.leaderboard-tabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.leaderboard-tabs button {
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin: 0 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.leaderboard-tabs button.active {
+  background: #333;
+  color: white;
+  border-color: #333;
+}
+
+.leaderboard-tabs button:hover:not(.active) {
+  background: #eee;
+}
+
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-table th, .leaderboard-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.leaderboard-table th {
+  background-color: #eee;
+}
+
+.flag {
+  margin-right: 5px;
+}
