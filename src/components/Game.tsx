@@ -93,7 +93,7 @@ const Game: React.FC = () => {
         console.error('Failed to fetch country', e);
       }
 
-      const res = await fetch('http://localhost:3001/api/join', {
+      const res = await fetch('/api/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, country: countryCode }),
@@ -138,7 +138,7 @@ const Game: React.FC = () => {
 
         setActiveWeapon(playerChoice);
         try {
-          await fetch('http://localhost:3001/api/choice', {
+          await fetch('/api/choice', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, choice: playerChoice }),
@@ -243,9 +243,9 @@ const Game: React.FC = () => {
   const pollMultiplayerState = useCallback(async () => {
     if (!username || !isMultiplayer) return;
     try {
-      const res = await fetch(`http://localhost:3001/api/state?username=${encodeURIComponent(username)}`);
+      const res = await fetch(`/api/state?username=${encodeURIComponent(username)}`);
       if (res.ok) {
-        const data = await fetch(`http://localhost:3001/api/state?username=${encodeURIComponent(username)}`).then(r => r.json());
+        const data = await res.json();
         if (data.status === 'not_found') {
           setIsMultiplayer(false);
           setMultiplayerState('idle');

@@ -36,7 +36,7 @@ const Leaderboard: React.FC = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/leaderboard');
+        const res = await fetch('/api/leaderboard');
         if (res.ok) {
           const json = await res.json();
           setData(json);
