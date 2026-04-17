@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Leaderboard.css';
+import { API_BASE_URL } from '../config';
 
 interface LeaderboardEntry {
   username: string;
@@ -36,7 +37,7 @@ const Leaderboard: React.FC = () => {
   useEffect(() => {
     const fetchLeaderboard = async () => {
       try {
-        const res = await fetch('http://localhost:3001/api/leaderboard');
+        const res = await fetch(`${API_BASE_URL}/api/leaderboard`);
         if (res.ok) {
           const json = await res.json();
           setData(json);
