@@ -1,11 +1,7 @@
 {
   "users": {
-    "PlayerOne": {
-      "lastActive": 1773483151982,
-      "country": "US"
-    },
-    "PlayerTwo": {
-      "lastActive": 1773483152235,
+    "Player1": {
+      "lastActive": 1776400511148,
       "country": "US"
     }
   },
@@ -20,6 +16,14 @@
         "PlayerOne": "win",
         "PlayerTwo": "lose"
       }
+    },
+    "game_1776400510123_3l68g": {
+      "player1": "Player1",
+      "player2": null,
+      "p1Choice": null,
+      "p2Choice": null,
+      "status": "waiting",
+      "result": null
     }
   },
   "leaderboard": [
