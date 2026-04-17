@@ -1,0 +1,3 @@
+## 2025-04-17 - Added Keyboard Accessibility and Contextual Tooltips to Game Controls
+**Learning:** The game's primary interactions (weapon selection) were implemented using generic `<li>` tags with `onClick` handlers, which made them completely inaccessible to keyboard users and screen readers. Additionally, disabled buttons lacked context, leaving users wondering why they couldn't interact with certain modes (like Challenge Mode while in Multiplayer).
+**Action:** When implementing custom interactive elements (like lists acting as buttons), always add `role="button"`, `tabIndex={0}`, and an `onKeyDown` handler to support 'Enter' and 'Space' keys. Furthermore, provide a `title` or `aria-description` to disabled controls to explain the application's state to the user.
