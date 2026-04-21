@@ -1,0 +1,3 @@
+## 2024-04-21 - Interactive Emojis Need Accessible Roles
+**Learning:** Using generic HTML elements like `<li>` to wrap emojis for interactive game choices makes them invisible to keyboard and screen reader users, violating accessibility patterns. They must be explicitly treated as buttons.
+**Action:** Always ensure that when using non-interactive elements for interactive actions, add `role="button"`, `tabIndex={0}`, an appropriate `aria-label`, and keyboard event handlers (`onKeyDown` handling Enter and Space).
