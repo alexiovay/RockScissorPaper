@@ -44,6 +44,12 @@ ul, li {
    -khtml-user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
+  border-radius: 8px;
+  padding: 5px;
+}
+.weapons li:focus-visible {
+  outline: 2px solid #333;
+  outline-offset: 4px;
 }
 .enemy li {
   width: 100%;
