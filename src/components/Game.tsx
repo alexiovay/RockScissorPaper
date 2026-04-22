@@ -343,13 +343,23 @@ const Game: React.FC = () => {
         {wins}:{loses}
       </div>
 
-      <ul className="weapons">
+      <ul className="weapons" role="group" aria-label="Weapon choices">
         {WEAPON_KEYS.map((weapon) => (
           <li
             key={weapon}
             id={weapon}
+            role="button"
+            tabIndex={0}
+            aria-label={`Play ${weapon}`}
+            title={`Play ${weapon}`}
             onClick={() => {
               playGame(weapon);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                playGame(weapon);
+              }
             }}
             className={activeWeapon === weapon ? 'fadeIn' : activeWeapon === null ? 'fadeIn' : 'fadeOut'}
           >
