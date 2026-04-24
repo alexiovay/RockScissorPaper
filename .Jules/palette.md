@@ -1,0 +1,3 @@
+## 2024-05-24 - Semantically Meaningless Emojis as Controls
+**Learning:** Using `<li>` elements containing only emojis as the primary interactive controls is a significant accessibility anti-pattern. While visually clear to sighted users, it provides no context to screen readers, lacks inherent keyboard focusability (`tabIndex`), and does not respond to standard keyboard interaction keys (Enter/Space).
+**Action:** When using non-interactive elements or emojis as main action triggers, ensure they have `role="button"`, `tabIndex={0}`, an `aria-label` explaining the action, and a keyboard event handler (`onKeyDown`) that supports Enter and Space keys. Include `:focus-visible` styles to indicate keyboard focus.

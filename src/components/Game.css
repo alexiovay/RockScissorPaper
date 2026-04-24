@@ -45,6 +45,11 @@ ul, li {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
+.weapons li:focus-visible {
+  outline: 3px solid #ff9800;
+  outline-offset: 5px;
+  border-radius: 8px;
+}
 .enemy li {
   width: 100%;
   border-top: 1px dotted #ccc;
@@ -152,6 +157,10 @@ button:disabled {
   border: 1px solid #ccc;
   font-family: Courier;
   font-size: 16px;
+}
+.multiplayer-join input:focus-visible {
+  outline: 3px solid #ff9800;
+  outline-offset: 2px;
 }
 
 .multiplayer-status {
