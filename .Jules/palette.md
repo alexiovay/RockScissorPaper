@@ -1,0 +1,3 @@
+## 2024-04-25 - Accessible Emoji Controls
+**Learning:** Using raw HTML elements like `<li>` for interactive icon-only buttons (like emoji controls) requires explicit accessibility management, as they lack semantic meaning and keyboard focus behavior natively. Screen readers won't announce them correctly, and keyboard users can't navigate to them.
+**Action:** When converting non-interactive elements (like `<li>` or `<div>`) to interactive custom controls, always include `role="button"`, `tabIndex={0}`, an explicit `aria-label`, an `onKeyDown` handler (for `Enter` and `Space`), and `:focus-visible` styling to ensure parity with native `<button>` elements.
