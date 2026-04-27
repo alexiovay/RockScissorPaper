@@ -1,0 +1,3 @@
+## 2026-04-27 - Icon-only Interactive Elements (Emoji) Need Explicit A11y Attributes
+**Learning:** Emoji-based elements acting as buttons (e.g., `<li onClick={...}>✊🏻</li>`) are completely opaque to screen readers without an `aria-label` and `role="button"`. Furthermore, they lack default keyboard navigation (`tabIndex`) and interaction (`onKeyDown` for Enter/Space), making them unusable for non-mouse users.
+**Action:** When adding interactive elements that rely purely on emojis or icons for visual meaning, always add `role="button"`, `tabIndex={0}`, a descriptive `aria-label`, and keyboard event handlers (for Enter/Space) to match mouse `onClick` functionality.
