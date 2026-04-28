@@ -1,0 +1,3 @@
+## 2024-04-28 - Custom Interactive Elements (Li -> Button)
+**Learning:** Using `<li>` elements as non-standard interactive icons without native button semantics results in screen readers ignoring them and prevents keyboard users from focusing and activating them.
+**Action:** When using non-interactive elements like `<li>` or `<div>` as buttons, always apply `role="button"`, `tabIndex={0}`, an explicit `aria-label` (especially for icon-only content), and an `onKeyDown` handler mapping 'Enter' and 'Space' to the click action. Additionally, provide clear `:focus-visible` styles matching the design system (e.g., using the accent color).
