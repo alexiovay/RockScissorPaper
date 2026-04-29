@@ -343,13 +343,22 @@ const Game: React.FC = () => {
         {wins}:{loses}
       </div>
 
-      <ul className="weapons">
+      <ul className="weapons" role="group" aria-label="Choose your weapon">
         {WEAPON_KEYS.map((weapon) => (
           <li
             key={weapon}
             id={weapon}
+            role="button"
+            tabIndex={0}
+            aria-label={`Choose ${weapon}`}
             onClick={() => {
               playGame(weapon);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                playGame(weapon);
+              }
             }}
             className={activeWeapon === weapon ? 'fadeIn' : activeWeapon === null ? 'fadeIn' : 'fadeOut'}
           >
@@ -383,6 +392,7 @@ const Game: React.FC = () => {
             <input
               type="text"
               placeholder="Username"
+              aria-label="Username"
               value={username}
               onChange={e => setUsername(e.target.value)}
               disabled={isMultiplayer}

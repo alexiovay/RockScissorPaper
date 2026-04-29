@@ -1,0 +1,3 @@
+## 2024-05-18 - Missing keyboard navigation and context on icon-only interactive list items
+**Learning:** List items (`<li>`) acting as icon-only interactive elements (like weapon choices) are entirely inaccessible without explicit `role="button"`, `tabIndex`, keyboard event handlers (`onKeyDown`), and descriptive `aria-label`s. Screen reader and keyboard users cannot perceive or interact with them.
+**Action:** When creating custom interactive elements out of non-interactive tags like `<li>` or `<div>`, always add `role="button"`, `tabIndex={0}`, handle `Enter` and `Space` key presses, provide descriptive `aria-label`s (especially if content is just emojis/icons), and add clear `:focus-visible` styling.
